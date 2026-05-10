@@ -63,38 +63,48 @@
 }
 
 :root {
-  --radius: 1.25rem;
-  /* Deep emerald canvas with warm parchment surfaces and saffron-gold accent */
-  --background: oklch(0.18 0.045 165);
-  --foreground: oklch(0.97 0.02 85);
-  --card: oklch(0.23 0.05 165);
-  --card-foreground: oklch(0.97 0.02 85);
-  --popover: oklch(0.23 0.05 165);
-  --popover-foreground: oklch(0.97 0.02 85);
-  --primary: oklch(0.82 0.16 80);            /* saffron gold */
-  --primary-foreground: oklch(0.2 0.05 165);
-  --secondary: oklch(0.3 0.06 165);
-  --secondary-foreground: oklch(0.97 0.02 85);
-  --muted: oklch(0.27 0.04 165);
-  --muted-foreground: oklch(0.78 0.03 85);
-  --accent: oklch(0.55 0.18 25);             /* maroon rose */
-  --accent-foreground: oklch(0.97 0.02 85);
-  --destructive: oklch(0.6 0.22 27);
-  --destructive-foreground: oklch(0.97 0.02 85);
-  --border: oklch(0.35 0.05 165);
-  --input: oklch(0.27 0.04 165);
-  --ring: oklch(0.82 0.16 80);
-  --chart-1: oklch(0.82 0.16 80);
-  --chart-2: oklch(0.55 0.18 25);
+  --radius: 1.5rem;
+  /* Neumorphism — warm ivory canvas, single-tone surfaces, sculpted shadows.
+   * Accent: a single rich copper/rose-gold for high-value CTAs. */
+  --background: oklch(0.945 0.012 75);          /* warm ivory */
+  --foreground: oklch(0.22 0.02 270);           /* deep slate ink */
+  --card: oklch(0.945 0.012 75);
+  --card-foreground: oklch(0.22 0.02 270);
+  --popover: oklch(0.945 0.012 75);
+  --popover-foreground: oklch(0.22 0.02 270);
+  --primary: oklch(0.65 0.16 38);               /* rose copper */
+  --primary-foreground: oklch(0.98 0.01 75);
+  --secondary: oklch(0.945 0.012 75);
+  --secondary-foreground: oklch(0.22 0.02 270);
+  --muted: oklch(0.92 0.01 75);
+  --muted-foreground: oklch(0.5 0.02 270);
+  --accent: oklch(0.55 0.12 250);               /* deep indigo */
+  --accent-foreground: oklch(0.98 0.01 75);
+  --destructive: oklch(0.58 0.22 27);
+  --destructive-foreground: oklch(0.98 0.01 75);
+  --border: oklch(0.88 0.01 75);
+  --input: oklch(0.93 0.01 75);
+  --ring: oklch(0.65 0.16 38);
+  --chart-1: oklch(0.65 0.16 38);
+  --chart-2: oklch(0.55 0.12 250);
   --chart-3: oklch(0.7 0.12 165);
-  --chart-4: oklch(0.65 0.2 50);
+  --chart-4: oklch(0.75 0.14 80);
   --chart-5: oklch(0.6 0.15 320);
 
-  --gradient-royal: linear-gradient(135deg, oklch(0.18 0.045 165), oklch(0.28 0.07 165) 60%, oklch(0.22 0.08 25));
-  --gradient-gold: linear-gradient(135deg, oklch(0.86 0.16 85), oklch(0.72 0.18 50));
-  --shadow-gold: 0 12px 40px -12px oklch(0.82 0.16 80 / 0.45);
-  --shadow-deep: 0 20px 60px -20px oklch(0 0 0 / 0.6);
-  --font-display: "Playfair Display", "Cormorant Garamond", Georgia, serif;
+  /* Neumorphic light/dark shadow pair — base ivory oklch(0.945 0.012 75) */
+  --nm-light: oklch(1 0 0);
+  --nm-dark: oklch(0.78 0.02 75);
+  --shadow-nm: 8px 8px 20px oklch(0.78 0.02 75 / 0.55), -8px -8px 20px oklch(1 0 0 / 0.95);
+  --shadow-nm-sm: 4px 4px 10px oklch(0.78 0.02 75 / 0.5), -4px -4px 10px oklch(1 0 0 / 0.9);
+  --shadow-nm-lg: 14px 14px 32px oklch(0.78 0.02 75 / 0.55), -14px -14px 32px oklch(1 0 0 / 0.95);
+  --shadow-nm-inset: inset 5px 5px 12px oklch(0.78 0.02 75 / 0.55), inset -5px -5px 12px oklch(1 0 0 / 0.95);
+  --shadow-nm-inset-sm: inset 3px 3px 7px oklch(0.78 0.02 75 / 0.5), inset -3px -3px 7px oklch(1 0 0 / 0.9);
+  --shadow-copper: 0 14px 40px -10px oklch(0.65 0.16 38 / 0.5);
+
+  --gradient-copper: linear-gradient(135deg, oklch(0.72 0.16 45), oklch(0.58 0.18 28));
+  --gradient-surface: linear-gradient(145deg, oklch(0.96 0.012 75), oklch(0.92 0.012 75));
+
+  --font-display: "Playfair Display", Georgia, serif;
   --font-body: "Manrope", "Inter", system-ui, sans-serif;
 }
 
@@ -102,28 +112,66 @@
   * { border-color: var(--color-border); }
   html, body { font-family: var(--font-body); }
   body {
-    background: var(--gradient-royal);
-    background-attachment: fixed;
+    background: var(--color-background);
     color: var(--color-foreground);
     min-height: 100svh;
+    -webkit-font-smoothing: antialiased;
   }
-  h1, h2, h3 { font-family: var(--font-display); letter-spacing: -0.01em; }
+  h1, h2, h3 { font-family: var(--font-display); letter-spacing: -0.02em; }
 }
 
 @layer utilities {
-  .text-gradient-gold {
-    background: var(--gradient-gold);
-    -webkit-background-clip: text;
-    background-clip: text;
+  .text-gradient-copper {
+    background: var(--gradient-copper);
+    -webkit-background-clip: text; background-clip: text;
     color: transparent;
   }
-  .bg-gradient-gold { background: var(--gradient-gold); }
-  .shadow-gold { box-shadow: var(--shadow-gold); }
-  .shadow-deep { box-shadow: var(--shadow-deep); }
-  .glass {
-    background: oklch(0.23 0.05 165 / 0.65);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    border: 1px solid oklch(0.82 0.16 80 / 0.18);
+  .bg-copper { background: var(--gradient-copper); }
+  .shadow-copper { box-shadow: var(--shadow-copper); }
+
+  .nm-raised {
+    background: var(--gradient-surface);
+    box-shadow: var(--shadow-nm);
+  }
+  .nm-raised-sm {
+    background: var(--gradient-surface);
+    box-shadow: var(--shadow-nm-sm);
+  }
+  .nm-raised-lg {
+    background: var(--gradient-surface);
+    box-shadow: var(--shadow-nm-lg);
+  }
+  .nm-inset {
+    background: var(--color-background);
+    box-shadow: var(--shadow-nm-inset);
+  }
+  .nm-inset-sm {
+    background: var(--color-background);
+    box-shadow: var(--shadow-nm-inset-sm);
+  }
+  .nm-pressable {
+    background: var(--gradient-surface);
+    box-shadow: var(--shadow-nm-sm);
+    transition: box-shadow 180ms ease, transform 180ms ease;
+  }
+  .nm-pressable:active {
+    box-shadow: var(--shadow-nm-inset-sm);
+    transform: scale(0.99);
+  }
+
+  @keyframes nm-pulse {
+    0%, 100% { box-shadow: var(--shadow-nm); }
+    50% { box-shadow: var(--shadow-nm-lg); }
+  }
+  .animate-nm-pulse { animation: nm-pulse 2.4s ease-in-out infinite; }
+
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+  .shimmer {
+    background: linear-gradient(90deg, transparent, oklch(1 0 0 / 0.6), transparent);
+    background-size: 200% 100%;
+    animation: shimmer 1.8s linear infinite;
   }
 }
