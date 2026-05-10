@@ -1,40 +1,46 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useRef, useState } from "react";
-import { Camera, Upload, Sparkles, Loader2, Download, RotateCcw, Shirt, User } from "lucide-react";
+import {
+  Sparkles, Loader2, Download, RotateCcw, Shirt, User, Check, Camera, Wand2,
+} from "lucide-react";
 import { toast, Toaster } from "sonner";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "UnStitch — Virtual Try-On for Unstitched Fabric" },
-      { name: "description", content: "Upload a fabric and your photo. UnStitch stitches it into your chosen dress style and shows you wearing it — instantly." },
+      {
+        name: "description",
+        content:
+          "Upload a fabric and your photo. UnStitch tailors it into your chosen dress style and shows you wearing it — instantly.",
+      },
     ],
   }),
   component: Home,
 });
 
 type Gender = "women" | "men";
-type Style = { name: string; tag: string };
+type Style = { name: string; tag: string; emoji: string };
 
 const WOMEN_STYLES: Style[] = [
-  { name: "Shalwar Qameez", tag: "Daily / Formal" },
-  { name: "Anarkali", tag: "Festive" },
-  { name: "Saree", tag: "Formal" },
-  { name: "Lehenga", tag: "Wedding" },
-  { name: "Kurti", tag: "Casual" },
-  { name: "Gharara", tag: "Festive" },
-  { name: "Maxi Dress", tag: "Casual" },
-  { name: "Abaya", tag: "Modest" },
+  { name: "Shalwar Qameez", tag: "Daily / Formal", emoji: "👗" },
+  { name: "Anarkali", tag: "Festive", emoji: "✨" },
+  { name: "Saree", tag: "Formal", emoji: "🌸" },
+  { name: "Lehenga", tag: "Wedding", emoji: "💍" },
+  { name: "Kurti", tag: "Casual", emoji: "🌿" },
+  { name: "Gharara", tag: "Festive", emoji: "🎀" },
+  { name: "Maxi Dress", tag: "Casual", emoji: "🌊" },
+  { name: "Abaya", tag: "Modest", emoji: "🌙" },
 ];
 
 const MEN_STYLES: Style[] = [
-  { name: "Shalwar Kameez", tag: "Daily / Formal" },
-  { name: "Sherwani", tag: "Wedding" },
-  { name: "Kurta Pyjama", tag: "Festive" },
-  { name: "Waistcoat Set", tag: "Semi-formal" },
-  { name: "T-Shirt", tag: "Casual" },
-  { name: "Polo Shirt", tag: "Smart Casual" },
-  { name: "Formal Suit", tag: "Formal" },
+  { name: "Shalwar Kameez", tag: "Daily / Formal", emoji: "🧥" },
+  { name: "Sherwani", tag: "Wedding", emoji: "🤵" },
+  { name: "Kurta Pyjama", tag: "Festive", emoji: "🪔" },
+  { name: "Waistcoat Set", tag: "Semi-formal", emoji: "🎩" },
+  { name: "T-Shirt", tag: "Casual", emoji: "👕" },
+  { name: "Polo Shirt", tag: "Smart Casual", emoji: "🎽" },
+  { name: "Formal Suit", tag: "Formal", emoji: "🕴️" },
 ];
 
 const fileToDataUrl = (file: File) =>
@@ -47,42 +53,53 @@ const fileToDataUrl = (file: File) =>
 
 function UploadTile({
   label,
+  hint,
   icon,
   image,
   onPick,
   inputRef,
+  step,
 }: {
   label: string;
+  hint: string;
   icon: React.ReactNode;
   image: string | null;
   onPick: (f: File) => void;
   inputRef: React.RefObject<HTMLInputElement | null>;
+  step: number;
 }) {
   return (
     <button
       type="button"
       onClick={() => inputRef.current?.click()}
-      className="group relative aspect-[3/4] w-full overflow-hidden rounded-3xl glass shadow-deep transition-transform active:scale-[0.98]"
+      className="group relative aspect-[3/4] w-full overflow-hidden rounded-[2rem] nm-raised transition-all active:scale-[0.985]"
     >
       {image ? (
-        <img src={image} alt={label} className="absolute inset-0 h-full w-full object-cover" />
+        <>
+          <img src={image} alt={label} className="absolute inset-0 h-full w-full object-cover" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-black/10" />
+          <div className="absolute right-3 top-3 flex h-7 w-7 items-center justify-center rounded-full bg-copper text-primary-foreground shadow-copper">
+            <Check className="h-4 w-4" strokeWidth={3} />
+          </div>
+          <div className="absolute inset-x-0 bottom-0 flex items-center justify-between p-3 text-xs text-white">
+            <span className="font-semibold tracking-wide">{label}</span>
+            <span className="rounded-full bg-white/95 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-foreground">
+              Replace
+            </span>
+          </div>
+        </>
       ) : (
         <div className="flex h-full w-full flex-col items-center justify-center gap-3 p-4 text-center">
-          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-gold text-primary-foreground shadow-gold">
+          <div className="flex h-7 w-7 items-center justify-center rounded-full nm-inset-sm text-[11px] font-bold text-muted-foreground">
+            {step}
+          </div>
+          <div className="flex h-16 w-16 items-center justify-center rounded-2xl nm-inset text-primary">
             {icon}
           </div>
-          <div className="text-sm font-medium text-foreground/90">{label}</div>
-          <div className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
-            Tap to upload
+          <div className="text-sm font-semibold text-foreground">{label}</div>
+          <div className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+            {hint}
           </div>
-        </div>
-      )}
-      {image && (
-        <div className="absolute inset-x-0 bottom-0 flex items-center justify-between bg-gradient-to-t from-black/70 to-transparent p-3 text-xs">
-          <span className="font-medium text-foreground/95">{label}</span>
-          <span className="rounded-full bg-primary/90 px-2 py-0.5 text-[10px] font-semibold text-primary-foreground">
-            Replace
-          </span>
         </div>
       )}
       <input
@@ -113,7 +130,9 @@ function Home() {
   const personRef = useRef<HTMLInputElement>(null);
 
   const styles = gender === "women" ? WOMEN_STYLES : MEN_STYLES;
-  const ready = fabric && person && selectedStyle && !loading;
+  const ready = !!(fabric && person && selectedStyle && !loading);
+  const completed = [fabric, person, selectedStyle].filter(Boolean).length;
+  const progress = Math.round((completed / 3) * 100);
 
   const handleFabric = async (f: File) => setFabric(await fileToDataUrl(f));
   const handlePerson = async (f: File) => setPerson(await fileToDataUrl(f));
@@ -141,6 +160,9 @@ function Home() {
       if (!resp.ok) throw new Error(data.error || "Failed");
       setResult(data.image);
       toast.success("Your try-on is ready");
+      setTimeout(() => {
+        document.getElementById("result")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 100);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Something went wrong");
     } finally {
@@ -156,51 +178,86 @@ function Home() {
   };
 
   return (
-    <main className="mx-auto min-h-svh w-full max-w-[440px] px-5 pb-32 pt-8">
-      <Toaster position="top-center" theme="dark" richColors />
+    <main className="mx-auto min-h-svh w-full max-w-[460px] px-5 pb-36 pt-7">
+      <Toaster
+        position="top-center"
+        toastOptions={{
+          style: {
+            background: "var(--color-background)",
+            color: "var(--color-foreground)",
+            boxShadow: "var(--shadow-nm-sm)",
+            border: "none",
+            borderRadius: "1rem",
+          },
+        }}
+      />
 
       {/* Header */}
-      <header className="mb-8 flex items-center justify-between">
-        <div>
-          <div className="text-[10px] font-semibold uppercase tracking-[0.32em] text-primary/80">
-            Virtual Try-On
+      <header className="mb-7 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl nm-raised-sm">
+            <span className="text-xl font-bold text-gradient-copper">U</span>
           </div>
-          <h1 className="mt-1 text-3xl font-bold leading-none">
-            Un<span className="text-gradient-gold">Stitch</span>
-          </h1>
+          <div>
+            <div className="text-[9px] font-bold uppercase tracking-[0.32em] text-primary">
+              Virtual Atelier
+            </div>
+            <h1 className="text-2xl font-bold leading-none tracking-tight">
+              Un<span className="text-gradient-copper">Stitch</span>
+            </h1>
+          </div>
         </div>
-        <div className="flex h-11 w-11 items-center justify-center rounded-full glass">
-          <Sparkles className="h-5 w-5 text-primary" />
+        <div className="flex h-12 w-12 items-center justify-center rounded-2xl nm-raised-sm text-primary">
+          <Sparkles className="h-5 w-5" />
         </div>
       </header>
+
+      {/* Progress card */}
+      <div className="mb-6 rounded-3xl nm-raised p-4">
+        <div className="flex items-center justify-between text-xs">
+          <span className="font-semibold text-foreground">Your session</span>
+          <span className="font-bold text-primary">{progress}%</span>
+        </div>
+        <div className="mt-3 h-2.5 rounded-full nm-inset-sm overflow-hidden">
+          <div
+            className="h-full bg-copper rounded-full transition-all duration-500 ease-out"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+        <div className="mt-3 flex justify-between text-[10px] uppercase tracking-wider text-muted-foreground">
+          <span className={fabric ? "text-primary font-bold" : ""}>1. Fabric</span>
+          <span className={person ? "text-primary font-bold" : ""}>2. Photo</span>
+          <span className={selectedStyle ? "text-primary font-bold" : ""}>3. Style</span>
+        </div>
+      </div>
 
       {/* Uploads */}
       <section className="grid grid-cols-2 gap-4">
         <UploadTile
           label="Fabric"
-          icon={<Shirt className="h-6 w-6" />}
+          hint="Tap to upload"
+          step={1}
+          icon={<Shirt className="h-7 w-7" />}
           image={fabric}
           onPick={handleFabric}
           inputRef={fabricRef}
         />
         <UploadTile
-          label="Your photo"
-          icon={<User className="h-6 w-6" />}
+          label="Your Photo"
+          hint="Full body works best"
+          step={2}
+          icon={<User className="h-7 w-7" />}
           image={person}
           onPick={handlePerson}
           inputRef={personRef}
         />
       </section>
 
-      <p className="mt-3 text-center text-xs text-muted-foreground">
-        Upload an unstitched fabric and a full-body photo
-      </p>
-
       {/* Gender toggle */}
-      <div className="mt-8">
-        <div className="relative grid grid-cols-2 rounded-full glass p-1">
+      <div className="mt-7">
+        <div className="relative grid grid-cols-2 rounded-full nm-inset-sm p-1.5">
           <span
-            className="absolute inset-y-1 w-1/2 rounded-full bg-gradient-gold shadow-gold transition-transform duration-300"
+            className="absolute inset-y-1.5 left-1.5 w-[calc(50%-0.375rem)] rounded-full bg-copper shadow-copper transition-transform duration-300"
             style={{ transform: gender === "women" ? "translateX(0)" : "translateX(100%)" }}
           />
           {(["women", "men"] as Gender[]).map((g) => (
@@ -210,8 +267,8 @@ function Home() {
                 setGender(g);
                 setSelectedStyle(null);
               }}
-              className={`relative z-10 py-2.5 text-sm font-semibold capitalize transition-colors ${
-                gender === g ? "text-primary-foreground" : "text-foreground/70"
+              className={`relative z-10 py-2.5 text-sm font-bold capitalize tracking-wide transition-colors ${
+                gender === g ? "text-primary-foreground" : "text-muted-foreground"
               }`}
             >
               {g}
@@ -221,30 +278,35 @@ function Home() {
       </div>
 
       {/* Style picker */}
-      <section className="mt-5">
-        <div className="mb-3 flex items-baseline justify-between">
-          <h2 className="text-lg font-semibold">Choose a style</h2>
-          <span className="text-xs text-muted-foreground">{styles.length} options</span>
+      <section className="mt-6">
+        <div className="mb-4 flex items-baseline justify-between">
+          <h2 className="text-xl font-bold">
+            Choose <span className="text-gradient-copper">style</span>
+          </h2>
+          <span className="text-[11px] uppercase tracking-wider text-muted-foreground">
+            {styles.length} options
+          </span>
         </div>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-3.5">
           {styles.map((s) => {
             const active = selectedStyle === s.name;
             return (
               <button
                 key={s.name}
                 onClick={() => setSelectedStyle(s.name)}
-                className={`group relative overflow-hidden rounded-2xl border p-4 text-left transition-all ${
-                  active
-                    ? "border-primary bg-primary/10 shadow-gold"
-                    : "border-border/40 glass hover:border-primary/40"
+                className={`relative overflow-hidden rounded-2xl p-4 text-left transition-all duration-200 ${
+                  active ? "nm-inset" : "nm-pressable"
                 }`}
               >
-                <div className="text-sm font-semibold leading-tight">{s.name}</div>
-                <div className="mt-1 text-[10px] uppercase tracking-wider text-muted-foreground">
+                <div className="mb-2 text-2xl">{s.emoji}</div>
+                <div className="text-sm font-bold leading-tight text-foreground">{s.name}</div>
+                <div className="mt-0.5 text-[10px] uppercase tracking-wider text-muted-foreground">
                   {s.tag}
                 </div>
                 {active && (
-                  <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-primary shadow-gold" />
+                  <span className="absolute right-2.5 top-2.5 flex h-5 w-5 items-center justify-center rounded-full bg-copper text-primary-foreground shadow-copper">
+                    <Check className="h-3 w-3" strokeWidth={3.5} />
+                  </span>
                 )}
               </button>
             );
@@ -254,31 +316,46 @@ function Home() {
 
       {/* Result */}
       {(loading || result) && (
-        <section className="mt-8">
-          <h2 className="mb-3 text-lg font-semibold">Your try-on</h2>
-          <div className="relative aspect-[3/4] w-full overflow-hidden rounded-3xl glass shadow-deep">
+        <section id="result" className="mt-8">
+          <div className="mb-3 flex items-center gap-2">
+            <Wand2 className="h-4 w-4 text-primary" />
+            <h2 className="text-xl font-bold">Your try-on</h2>
+          </div>
+          <div className="relative aspect-[3/4] w-full overflow-hidden rounded-[2rem] nm-raised-lg">
             {loading && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-background/40">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                <div className="text-sm text-muted-foreground">Stitching your look…</div>
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 p-6">
+                <div className="relative flex h-20 w-20 items-center justify-center rounded-full nm-inset animate-nm-pulse">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                </div>
+                <div className="text-center">
+                  <div className="text-sm font-semibold text-foreground">
+                    Tailoring your look…
+                  </div>
+                  <div className="mt-1 text-xs text-muted-foreground">
+                    Stitching {selectedStyle} from your fabric
+                  </div>
+                </div>
+                <div className="h-1.5 w-40 overflow-hidden rounded-full nm-inset-sm">
+                  <div className="shimmer h-full w-full" />
+                </div>
               </div>
             )}
-            {result && (
+            {result && !loading && (
               <img src={result} alt="Try-on result" className="h-full w-full object-cover" />
             )}
           </div>
           {result && !loading && (
-            <div className="mt-3 grid grid-cols-2 gap-3">
+            <div className="mt-4 grid grid-cols-2 gap-3">
               <a
                 href={result}
                 download="unstitch-tryon.png"
-                className="flex items-center justify-center gap-2 rounded-full glass py-3 text-sm font-medium"
+                className="flex items-center justify-center gap-2 rounded-2xl nm-pressable py-3.5 text-sm font-bold text-foreground"
               >
                 <Download className="h-4 w-4" /> Save
               </a>
               <button
                 onClick={reset}
-                className="flex items-center justify-center gap-2 rounded-full glass py-3 text-sm font-medium"
+                className="flex items-center justify-center gap-2 rounded-2xl nm-pressable py-3.5 text-sm font-bold text-foreground"
               >
                 <RotateCcw className="h-4 w-4" /> Start over
               </button>
@@ -288,25 +365,32 @@ function Home() {
       )}
 
       {/* Sticky CTA */}
-      <div className="fixed inset-x-0 bottom-0 z-20 mx-auto w-full max-w-[440px] px-5 pb-6 pt-4">
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background to-transparent" />
+      <div className="fixed inset-x-0 bottom-0 z-20 mx-auto w-full max-w-[460px] px-5 pb-6 pt-8">
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background via-background/85 to-transparent" />
         <button
           onClick={generate}
           disabled={!ready}
-          className="relative flex h-14 w-full items-center justify-center gap-2 rounded-full bg-gradient-gold text-base font-bold text-primary-foreground shadow-gold transition-all active:scale-[0.98] disabled:opacity-40 disabled:saturate-50"
+          className={`relative flex h-16 w-full items-center justify-center gap-2.5 rounded-full text-base font-bold tracking-wide transition-all active:scale-[0.985] ${
+            ready
+              ? "bg-copper text-primary-foreground shadow-copper"
+              : "nm-raised text-muted-foreground"
+          }`}
         >
           {loading ? (
             <>
-              <Loader2 className="h-5 w-5 animate-spin" /> Generating
+              <Loader2 className="h-5 w-5 animate-spin" /> Generating…
+            </>
+          ) : !fabric || !person ? (
+            <>
+              <Camera className="h-5 w-5" /> Upload both photos
+            </>
+          ) : !selectedStyle ? (
+            <>
+              <Shirt className="h-5 w-5" /> Pick a style
             </>
           ) : (
             <>
-              <Sparkles className="h-5 w-5" />
-              {!fabric || !person
-                ? "Upload both photos"
-                : !selectedStyle
-                  ? "Pick a style"
-                  : `Try on ${selectedStyle}`}
+              <Sparkles className="h-5 w-5" /> Try on {selectedStyle}
             </>
           )}
         </button>
