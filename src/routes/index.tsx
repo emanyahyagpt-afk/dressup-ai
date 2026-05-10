@@ -23,27 +23,27 @@ export const Route = createFileRoute("/")({
 });
 
 type Gender = "women" | "men";
-type Style = { name: string; tag: string; emoji: string };
+type Style = { name: string; tag: string; icon: IconType };
 
 const WOMEN_STYLES: Style[] = [
-  { name: "Shalwar Qameez", tag: "Daily / Formal", emoji: "👗" },
-  { name: "Anarkali", tag: "Festive", emoji: "✨" },
-  { name: "Saree", tag: "Formal", emoji: "🌸" },
-  { name: "Lehenga", tag: "Wedding", emoji: "💍" },
-  { name: "Kurti", tag: "Casual", emoji: "🌿" },
-  { name: "Gharara", tag: "Festive", emoji: "🎀" },
-  { name: "Maxi Dress", tag: "Casual", emoji: "🌊" },
-  { name: "Abaya", tag: "Modest", emoji: "🌙" },
+  { name: "Shalwar Qameez", tag: "Daily / Formal", icon: Shirt },
+  { name: "Anarkali", tag: "Festive", icon: Sparkles },
+  { name: "Saree", tag: "Formal", icon: Flower2 },
+  { name: "Lehenga", tag: "Wedding", icon: Gem },
+  { name: "Kurti", tag: "Casual", icon: Leaf },
+  { name: "Gharara", tag: "Festive", icon: Crown },
+  { name: "Maxi Dress", tag: "Casual", icon: Wind },
+  { name: "Abaya", tag: "Modest", icon: Moon },
 ];
 
 const MEN_STYLES: Style[] = [
-  { name: "Shalwar Kameez", tag: "Daily / Formal", emoji: "🧥" },
-  { name: "Sherwani", tag: "Wedding", emoji: "🤵" },
-  { name: "Kurta Pyjama", tag: "Festive", emoji: "🪔" },
-  { name: "Waistcoat Set", tag: "Semi-formal", emoji: "🎩" },
-  { name: "T-Shirt", tag: "Casual", emoji: "👕" },
-  { name: "Polo Shirt", tag: "Smart Casual", emoji: "🎽" },
-  { name: "Formal Suit", tag: "Formal", emoji: "🕴️" },
+  { name: "Shalwar Kameez", tag: "Daily / Formal", icon: Shirt },
+  { name: "Sherwani", tag: "Wedding", icon: Crown },
+  { name: "Kurta Pyjama", tag: "Festive", icon: Flame },
+  { name: "Waistcoat Set", tag: "Semi-formal", icon: Award },
+  { name: "T-Shirt", tag: "Casual", icon: Tag },
+  { name: "Polo Shirt", tag: "Smart Casual", icon: User },
+  { name: "Formal Suit", tag: "Formal", icon: Briefcase },
 ];
 
 const fileToDataUrl = (file: File) =>
