@@ -1,9 +1,12 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useRef, useState } from "react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useRef, useState, type ComponentType } from "react";
 import {
-  Sparkles, Loader2, Download, RotateCcw, Shirt, User, Check, Camera, Wand2,
+  Sparkles, Loader2, Shirt, User, Check, Camera,
+  Crown, Gem, Flower2, Leaf, Wind, Moon, Award, Briefcase, Flame, Tag,
 } from "lucide-react";
 import { toast, Toaster } from "sonner";
+
+type IconType = ComponentType<{ className?: string; strokeWidth?: number }>;
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -20,27 +23,27 @@ export const Route = createFileRoute("/")({
 });
 
 type Gender = "women" | "men";
-type Style = { name: string; tag: string; emoji: string };
+type Style = { name: string; tag: string; icon: IconType };
 
 const WOMEN_STYLES: Style[] = [
-  { name: "Shalwar Qameez", tag: "Daily / Formal", emoji: "👗" },
-  { name: "Anarkali", tag: "Festive", emoji: "✨" },
-  { name: "Saree", tag: "Formal", emoji: "🌸" },
-  { name: "Lehenga", tag: "Wedding", emoji: "💍" },
-  { name: "Kurti", tag: "Casual", emoji: "🌿" },
-  { name: "Gharara", tag: "Festive", emoji: "🎀" },
-  { name: "Maxi Dress", tag: "Casual", emoji: "🌊" },
-  { name: "Abaya", tag: "Modest", emoji: "🌙" },
+  { name: "Shalwar Qameez", tag: "Daily / Formal", icon: Shirt },
+  { name: "Anarkali", tag: "Festive", icon: Sparkles },
+  { name: "Saree", tag: "Formal", icon: Flower2 },
+  { name: "Lehenga", tag: "Wedding", icon: Gem },
+  { name: "Kurti", tag: "Casual", icon: Leaf },
+  { name: "Gharara", tag: "Festive", icon: Crown },
+  { name: "Maxi Dress", tag: "Casual", icon: Wind },
+  { name: "Abaya", tag: "Modest", icon: Moon },
 ];
 
 const MEN_STYLES: Style[] = [
-  { name: "Shalwar Kameez", tag: "Daily / Formal", emoji: "🧥" },
-  { name: "Sherwani", tag: "Wedding", emoji: "🤵" },
-  { name: "Kurta Pyjama", tag: "Festive", emoji: "🪔" },
-  { name: "Waistcoat Set", tag: "Semi-formal", emoji: "🎩" },
-  { name: "T-Shirt", tag: "Casual", emoji: "👕" },
-  { name: "Polo Shirt", tag: "Smart Casual", emoji: "🎽" },
-  { name: "Formal Suit", tag: "Formal", emoji: "🕴️" },
+  { name: "Shalwar Kameez", tag: "Daily / Formal", icon: Shirt },
+  { name: "Sherwani", tag: "Wedding", icon: Crown },
+  { name: "Kurta Pyjama", tag: "Festive", icon: Flame },
+  { name: "Waistcoat Set", tag: "Semi-formal", icon: Award },
+  { name: "T-Shirt", tag: "Casual", icon: Tag },
+  { name: "Polo Shirt", tag: "Smart Casual", icon: User },
+  { name: "Formal Suit", tag: "Formal", icon: Briefcase },
 ];
 
 const fileToDataUrl = (file: File) =>
@@ -119,12 +122,12 @@ function UploadTile({
 }
 
 function Home() {
+  const navigate = useNavigate();
   const [fabric, setFabric] = useState<string | null>(null);
   const [person, setPerson] = useState<string | null>(null);
   const [gender, setGender] = useState<Gender>("women");
   const [selectedStyle, setSelectedStyle] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<string | null>(null);
 
   const fabricRef = useRef<HTMLInputElement>(null);
   const personRef = useRef<HTMLInputElement>(null);
@@ -140,7 +143,6 @@ function Home() {
   const generate = async () => {
     if (!ready) return;
     setLoading(true);
-    setResult(null);
     try {
       const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/tryon`;
       const resp = await fetch(url, {
@@ -158,23 +160,15 @@ function Home() {
       });
       const data = await resp.json();
       if (!resp.ok) throw new Error(data.error || "Failed");
-      setResult(data.image);
+      sessionStorage.setItem("tryon:image", data.image);
+      sessionStorage.setItem("tryon:style", selectedStyle ?? "");
       toast.success("Your try-on is ready");
-      setTimeout(() => {
-        document.getElementById("result")?.scrollIntoView({ behavior: "smooth", block: "start" });
-      }, 100);
+      navigate({ to: "/result" });
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Something went wrong");
     } finally {
       setLoading(false);
     }
-  };
-
-  const reset = () => {
-    setFabric(null);
-    setPerson(null);
-    setSelectedStyle(null);
-    setResult(null);
   };
 
   return (
@@ -277,7 +271,7 @@ function Home() {
         </div>
       </div>
 
-      {/* Style picker */}
+      {/* Style picker — grouped by category */}
       <section className="mt-6">
         <div className="mb-4 flex items-baseline justify-between">
           <h2 className="text-xl font-bold">
@@ -287,81 +281,72 @@ function Home() {
             {styles.length} options
           </span>
         </div>
-        <div className="grid grid-cols-2 gap-3.5">
-          {styles.map((s) => {
-            const active = selectedStyle === s.name;
-            return (
-              <button
-                key={s.name}
-                onClick={() => setSelectedStyle(s.name)}
-                className={`relative overflow-hidden rounded-2xl p-4 text-left transition-all duration-200 ${
-                  active ? "nm-inset" : "nm-pressable"
-                }`}
-              >
-                <div className="mb-2 text-2xl">{s.emoji}</div>
-                <div className="text-sm font-bold leading-tight text-foreground">{s.name}</div>
-                <div className="mt-0.5 text-[10px] uppercase tracking-wider text-muted-foreground">
-                  {s.tag}
-                </div>
-                {active && (
-                  <span className="absolute right-2.5 top-2.5 flex h-5 w-5 items-center justify-center rounded-full bg-copper text-primary-foreground shadow-copper">
-                    <Check className="h-3 w-3" strokeWidth={3.5} />
-                  </span>
-                )}
-              </button>
-            );
-          })}
-        </div>
+
+        {Array.from(new Set(styles.map((s) => s.tag))).map((tag) => {
+          const group = styles.filter((s) => s.tag === tag);
+          return (
+            <div key={tag} className="mb-5 last:mb-0">
+              <div className="mb-2.5 flex items-center gap-2">
+                <span className="h-px flex-1 bg-border/60" />
+                <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+                  {tag}
+                </span>
+                <span className="h-px flex-1 bg-border/60" />
+              </div>
+              <div className="grid grid-cols-3 gap-3">
+                {group.map((s) => {
+                  const active = selectedStyle === s.name;
+                  const Icon = s.icon;
+                  return (
+                    <button
+                      key={s.name}
+                      onClick={() => setSelectedStyle(s.name)}
+                      className={`relative flex aspect-square flex-col items-center justify-center gap-2 rounded-2xl p-2 text-center transition-all duration-200 ${
+                        active ? "nm-inset" : "nm-pressable"
+                      }`}
+                    >
+                      <div
+                        className={`flex h-10 w-10 items-center justify-center rounded-xl ${
+                          active
+                            ? "bg-copper text-primary-foreground shadow-copper"
+                            : "nm-inset-sm text-primary"
+                        }`}
+                      >
+                        <Icon className="h-5 w-5" strokeWidth={2} />
+                      </div>
+                      <div className="text-[11px] font-bold leading-tight text-foreground">
+                        {s.name}
+                      </div>
+                      {active && (
+                        <span className="absolute right-1.5 top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-copper text-primary-foreground shadow-copper">
+                          <Check className="h-2.5 w-2.5" strokeWidth={3.5} />
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
       </section>
 
-      {/* Result */}
-      {(loading || result) && (
-        <section id="result" className="mt-8">
-          <div className="mb-3 flex items-center gap-2">
-            <Wand2 className="h-4 w-4 text-primary" />
-            <h2 className="text-xl font-bold">Your try-on</h2>
+      {/* Loading overlay */}
+      {loading && (
+        <div className="fixed inset-0 z-30 flex flex-col items-center justify-center gap-5 bg-background/85 backdrop-blur-md">
+          <div className="relative flex h-24 w-24 items-center justify-center rounded-full nm-inset animate-nm-pulse">
+            <Loader2 className="h-9 w-9 animate-spin text-primary" />
           </div>
-          <div className="relative aspect-[3/4] w-full overflow-hidden rounded-[2rem] nm-raised-lg">
-            {loading && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 p-6">
-                <div className="relative flex h-20 w-20 items-center justify-center rounded-full nm-inset animate-nm-pulse">
-                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                </div>
-                <div className="text-center">
-                  <div className="text-sm font-semibold text-foreground">
-                    Tailoring your look…
-                  </div>
-                  <div className="mt-1 text-xs text-muted-foreground">
-                    Stitching {selectedStyle} from your fabric
-                  </div>
-                </div>
-                <div className="h-1.5 w-40 overflow-hidden rounded-full nm-inset-sm">
-                  <div className="shimmer h-full w-full" />
-                </div>
-              </div>
-            )}
-            {result && !loading && (
-              <img src={result} alt="Try-on result" className="h-full w-full object-cover" />
-            )}
-          </div>
-          {result && !loading && (
-            <div className="mt-4 grid grid-cols-2 gap-3">
-              <a
-                href={result}
-                download="unstitch-tryon.png"
-                className="flex items-center justify-center gap-2 rounded-2xl nm-pressable py-3.5 text-sm font-bold text-foreground"
-              >
-                <Download className="h-4 w-4" /> Save
-              </a>
-              <button
-                onClick={reset}
-                className="flex items-center justify-center gap-2 rounded-2xl nm-pressable py-3.5 text-sm font-bold text-foreground"
-              >
-                <RotateCcw className="h-4 w-4" /> Start over
-              </button>
+          <div className="text-center">
+            <div className="text-base font-bold text-foreground">Tailoring your look…</div>
+            <div className="mt-1 text-xs text-muted-foreground">
+              Stitching {selectedStyle} from your fabric
             </div>
-          )}
-        </section>
+          </div>
+          <div className="h-1.5 w-48 overflow-hidden rounded-full nm-inset-sm">
+            <div className="shimmer h-full w-full" />
+          </div>
+        </div>
       )}
 
       {/* Sticky CTA */}
