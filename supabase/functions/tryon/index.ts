@@ -18,12 +18,26 @@ Deno.serve(async (req) => {
       });
     }
 
-    const prompt = `You are a virtual try-on engine for South Asian unstitched fabric.
-Image 1 is an UNSTITCHED FABRIC (raw cloth — capture its exact colour, print pattern, weave and texture).
-Image 2 is a PERSON (preserve their face, skin tone, hair, body proportions and pose exactly — do not alter identity).
-Task: stitch the fabric from Image 1 into a "${style}" (${gender}) garment and dress the person from Image 2 in it.
-Render a single photorealistic full-body image of the same person wearing the garment made of that exact fabric.
-Keep the original background simple and clean. No watermarks, no text. Output only the final try-on image.`;
+    const prompt = `Photorealistic virtual try-on. You are given two reference images:
+
+IMAGE 1 — UNSTITCHED FABRIC (raw cloth swatch).
+You MUST replicate this fabric with 100% fidelity on the final garment:
+- exact same colour and colour temperature (do not shift hue, saturation or brightness)
+- exact same print/pattern, motifs, embroidery, prints, borders and their scale
+- exact same weave, sheen and texture (silk, cotton, chiffon, lawn, velvet, etc.)
+- preserve any border / pallu / panel layout naturally on the stitched garment
+Treat IMAGE 1 as the ground truth for the fabric. Do NOT invent a new pattern or change colours.
+
+IMAGE 2 — THE PERSON.
+Preserve identity exactly: same face, facial features, skin tone, hair, body proportions, height and pose. Do not beautify, slim, age or change ethnicity. Do not change the gender.
+
+TASK: Tailor the fabric from IMAGE 1 into a well-stitched "${style}" garment for a ${gender}, and dress the exact person from IMAGE 2 in it. Show a single full-body, front-facing, sharp, photorealistic image, studio-quality lighting, neutral clean background, natural fabric drape and realistic stitching.
+
+STRICT OUTPUT RULES:
+- High resolution, sharp, no pixelation, no blur, no compression artefacts, no upscaling smear.
+- NO watermark, NO logo, NO signature, NO "Dreamslight", NO "Gemini", NO text, NO captions, NO borders, NO frame.
+- Do not add any brand mark or sample/preview overlay anywhere in the image.
+- Output ONLY the final clean try-on photo, nothing else.`;
 
     const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
