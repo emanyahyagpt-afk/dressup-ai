@@ -62,21 +62,22 @@
 }
 
 :root {
-  --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.129 0.042 264.695);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.129 0.042 264.695);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.129 0.042 264.695);
-  --primary: oklch(0.208 0.042 265.755);
-  --primary-foreground: oklch(0.984 0.003 247.858);
-  --secondary: oklch(0.968 0.007 247.896);
-  --secondary-foreground: oklch(0.208 0.042 265.755);
-  --muted: oklch(0.968 0.007 247.896);
-  --muted-foreground: oklch(0.554 0.046 257.417);
-  --accent: oklch(0.968 0.007 247.896);
-  --accent-foreground: oklch(0.208 0.042 265.755);
+  --radius: 1.25rem;
+  /* Deep emerald canvas with warm parchment surfaces and saffron-gold accent */
+  --background: oklch(0.18 0.045 165);
+  --foreground: oklch(0.97 0.02 85);
+  --card: oklch(0.23 0.05 165);
+  --card-foreground: oklch(0.97 0.02 85);
+  --popover: oklch(0.23 0.05 165);
+  --popover-foreground: oklch(0.97 0.02 85);
+  --primary: oklch(0.82 0.16 80);            /* saffron gold */
+  --primary-foreground: oklch(0.2 0.05 165);
+  --secondary: oklch(0.3 0.06 165);
+  --secondary-foreground: oklch(0.97 0.02 85);
+  --muted: oklch(0.27 0.04 165);
+  --muted-foreground: oklch(0.78 0.03 85);
+  --accent: oklch(0.55 0.18 25);             /* maroon rose */
+  --accent-foreground: oklch(0.97 0.02 85);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.984 0.003 247.858);
   --border: oklch(0.929 0.013 255.508);
