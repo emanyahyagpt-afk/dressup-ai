@@ -1,9 +1,12 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useRef, useState } from "react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useRef, useState, type ComponentType } from "react";
 import {
-  Sparkles, Loader2, Download, RotateCcw, Shirt, User, Check, Camera, Wand2,
+  Sparkles, Loader2, Shirt, User, Check, Camera,
+  Crown, Gem, Flower2, Leaf, Wind, Moon, Award, Briefcase, Flame, Tag,
 } from "lucide-react";
 import { toast, Toaster } from "sonner";
+
+type IconType = ComponentType<{ className?: string; strokeWidth?: number }>;
 
 export const Route = createFileRoute("/")({
   head: () => ({
