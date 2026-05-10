@@ -122,12 +122,12 @@ function UploadTile({
 }
 
 function Home() {
+  const navigate = useNavigate();
   const [fabric, setFabric] = useState<string | null>(null);
   const [person, setPerson] = useState<string | null>(null);
   const [gender, setGender] = useState<Gender>("women");
   const [selectedStyle, setSelectedStyle] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<string | null>(null);
 
   const fabricRef = useRef<HTMLInputElement>(null);
   const personRef = useRef<HTMLInputElement>(null);
@@ -143,7 +143,6 @@ function Home() {
   const generate = async () => {
     if (!ready) return;
     setLoading(true);
-    setResult(null);
     try {
       const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/tryon`;
       const resp = await fetch(url, {
@@ -161,23 +160,15 @@ function Home() {
       });
       const data = await resp.json();
       if (!resp.ok) throw new Error(data.error || "Failed");
-      setResult(data.image);
+      sessionStorage.setItem("tryon:image", data.image);
+      sessionStorage.setItem("tryon:style", selectedStyle ?? "");
       toast.success("Your try-on is ready");
-      setTimeout(() => {
-        document.getElementById("result")?.scrollIntoView({ behavior: "smooth", block: "start" });
-      }, 100);
+      navigate({ to: "/result" });
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Something went wrong");
     } finally {
       setLoading(false);
     }
-  };
-
-  const reset = () => {
-    setFabric(null);
-    setPerson(null);
-    setSelectedStyle(null);
-    setResult(null);
   };
 
   return (
