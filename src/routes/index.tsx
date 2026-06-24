@@ -1,12 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useRef, useState, type ComponentType } from "react";
-import {
-  Sparkles, Loader2, Shirt, User, Check, Camera,
-  Crown, Gem, Flower2, Leaf, Wind, Moon, Award, Briefcase, Flame, Tag,
-} from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Sparkles, Shirt, User, Check, Camera, Footprints, ArrowRight } from "lucide-react";
 import { toast, Toaster } from "sonner";
-
-type IconType = ComponentType<{ className?: string; strokeWidth?: number }>;
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -15,7 +10,7 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Upload a fabric and your photo. UnStitch tailors it into your chosen dress style and shows you wearing it — instantly.",
+          "Upload your fabric, your photo and shoes. UnStitch tailors a complete look on you — instantly.",
       },
     ],
   }),
@@ -23,28 +18,6 @@ export const Route = createFileRoute("/")({
 });
 
 type Gender = "women" | "men";
-type Style = { name: string; tag: string; icon: IconType };
-
-const WOMEN_STYLES: Style[] = [
-  { name: "Shalwar Qameez", tag: "Daily / Formal", icon: Shirt },
-  { name: "Anarkali", tag: "Festive", icon: Sparkles },
-  { name: "Saree", tag: "Formal", icon: Flower2 },
-  { name: "Lehenga", tag: "Wedding", icon: Gem },
-  { name: "Kurti", tag: "Casual", icon: Leaf },
-  { name: "Gharara", tag: "Festive", icon: Crown },
-  { name: "Maxi Dress", tag: "Casual", icon: Wind },
-  { name: "Abaya", tag: "Modest", icon: Moon },
-];
-
-const MEN_STYLES: Style[] = [
-  { name: "Shalwar Kameez", tag: "Daily / Formal", icon: Shirt },
-  { name: "Sherwani", tag: "Wedding", icon: Crown },
-  { name: "Kurta Pyjama", tag: "Festive", icon: Flame },
-  { name: "Waistcoat Set", tag: "Semi-formal", icon: Award },
-  { name: "T-Shirt", tag: "Casual", icon: Tag },
-  { name: "Polo Shirt", tag: "Smart Casual", icon: User },
-  { name: "Formal Suit", tag: "Formal", icon: Briefcase },
-];
 
 const fileToDataUrl = (file: File) =>
   new Promise<string>((resolve, reject) => {
@@ -62,6 +35,7 @@ function UploadTile({
   onPick,
   inputRef,
   step,
+  optional,
 }: {
   label: string;
   hint: string;
@@ -70,6 +44,7 @@ function UploadTile({
   onPick: (f: File) => void;
   inputRef: React.RefObject<HTMLInputElement | null>;
   step: number;
+  optional?: boolean;
 }) {
   return (
     <button
@@ -92,16 +67,16 @@ function UploadTile({
           </div>
         </>
       ) : (
-        <div className="flex h-full w-full flex-col items-center justify-center gap-3 p-4 text-center">
-          <div className="flex h-7 w-7 items-center justify-center rounded-full nm-inset-sm text-[11px] font-bold text-muted-foreground">
+        <div className="flex h-full w-full flex-col items-center justify-center gap-2.5 p-3 text-center">
+          <div className="flex h-6 w-6 items-center justify-center rounded-full nm-inset-sm text-[10px] font-bold text-muted-foreground">
             {step}
           </div>
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl nm-inset text-primary">
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl nm-inset text-primary">
             {icon}
           </div>
-          <div className="text-sm font-semibold text-foreground">{label}</div>
-          <div className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
-            {hint}
+          <div className="text-[13px] font-semibold text-foreground leading-tight">{label}</div>
+          <div className="text-[9px] uppercase tracking-[0.2em] text-muted-foreground">
+            {optional ? "Optional" : hint}
           </div>
         </div>
       )}
@@ -125,50 +100,40 @@ function Home() {
   const navigate = useNavigate();
   const [fabric, setFabric] = useState<string | null>(null);
   const [person, setPerson] = useState<string | null>(null);
+  const [shoes, setShoes] = useState<string | null>(null);
   const [gender, setGender] = useState<Gender>("women");
-  const [selectedStyle, setSelectedStyle] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
 
   const fabricRef = useRef<HTMLInputElement>(null);
   const personRef = useRef<HTMLInputElement>(null);
+  const shoesRef = useRef<HTMLInputElement>(null);
 
-  const styles = gender === "women" ? WOMEN_STYLES : MEN_STYLES;
-  const ready = !!(fabric && person && selectedStyle && !loading);
-  const completed = [fabric, person, selectedStyle].filter(Boolean).length;
-  const progress = Math.round((completed / 3) * 100);
+  // Restore from session (when coming back via Back)
+  useEffect(() => {
+    const f = sessionStorage.getItem("tryon:fabric");
+    const p = sessionStorage.getItem("tryon:person");
+    const s = sessionStorage.getItem("tryon:shoes");
+    const g = sessionStorage.getItem("tryon:gender") as Gender | null;
+    if (f) setFabric(f);
+    if (p) setPerson(p);
+    if (s) setShoes(s);
+    if (g) setGender(g);
+  }, []);
 
-  const handleFabric = async (f: File) => setFabric(await fileToDataUrl(f));
-  const handlePerson = async (f: File) => setPerson(await fileToDataUrl(f));
+  const ready = !!(fabric && person);
+  const completed = [fabric, person].filter(Boolean).length;
+  const progress = Math.round((completed / 2) * 100);
 
-  const generate = async () => {
-    if (!ready) return;
-    setLoading(true);
-    try {
-      const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/tryon`;
-      const resp = await fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-        },
-        body: JSON.stringify({
-          fabricImage: fabric,
-          personImage: person,
-          style: selectedStyle,
-          gender,
-        }),
-      });
-      const data = await resp.json();
-      if (!resp.ok) throw new Error(data.error || "Failed");
-      sessionStorage.setItem("tryon:image", data.image);
-      sessionStorage.setItem("tryon:style", selectedStyle ?? "");
-      toast.success("Your try-on is ready");
-      navigate({ to: "/result" });
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Something went wrong");
-    } finally {
-      setLoading(false);
+  const next = () => {
+    if (!ready) {
+      toast.error("Upload your fabric and photo first");
+      return;
     }
+    sessionStorage.setItem("tryon:fabric", fabric!);
+    sessionStorage.setItem("tryon:person", person!);
+    if (shoes) sessionStorage.setItem("tryon:shoes", shoes);
+    else sessionStorage.removeItem("tryon:shoes");
+    sessionStorage.setItem("tryon:gender", gender);
+    navigate({ to: "/styles" });
   };
 
   return (
@@ -206,10 +171,10 @@ function Home() {
         </div>
       </header>
 
-      {/* Progress card */}
+      {/* Step indicator */}
       <div className="mb-6 rounded-3xl nm-raised p-4">
         <div className="flex items-center justify-between text-xs">
-          <span className="font-semibold text-foreground">Your session</span>
+          <span className="font-semibold text-foreground">Step 1 of 3 · Uploads</span>
           <span className="font-bold text-primary">{progress}%</span>
         </div>
         <div className="mt-3 h-2.5 rounded-full nm-inset-sm overflow-hidden">
@@ -219,9 +184,9 @@ function Home() {
           />
         </div>
         <div className="mt-3 flex justify-between text-[10px] uppercase tracking-wider text-muted-foreground">
-          <span className={fabric ? "text-primary font-bold" : ""}>1. Fabric</span>
-          <span className={person ? "text-primary font-bold" : ""}>2. Photo</span>
-          <span className={selectedStyle ? "text-primary font-bold" : ""}>3. Style</span>
+          <span className={fabric ? "text-primary font-bold" : ""}>Fabric</span>
+          <span className={person ? "text-primary font-bold" : ""}>Photo</span>
+          <span className={shoes ? "text-primary font-bold" : ""}>Shoes</span>
         </div>
       </div>
 
@@ -229,26 +194,42 @@ function Home() {
       <section className="grid grid-cols-2 gap-4">
         <UploadTile
           label="Fabric"
-          hint="Tap to upload"
+          hint="Unstitched cloth"
           step={1}
-          icon={<Shirt className="h-7 w-7" />}
+          icon={<Shirt className="h-6 w-6" />}
           image={fabric}
-          onPick={handleFabric}
+          onPick={async (f) => setFabric(await fileToDataUrl(f))}
           inputRef={fabricRef}
         />
         <UploadTile
           label="Your Photo"
           hint="Full body works best"
           step={2}
-          icon={<User className="h-7 w-7" />}
+          icon={<User className="h-6 w-6" />}
           image={person}
-          onPick={handlePerson}
+          onPick={async (f) => setPerson(await fileToDataUrl(f))}
           inputRef={personRef}
+        />
+      </section>
+
+      <section className="mt-4">
+        <UploadTile
+          label="Shoes (optional)"
+          hint="Upload to match"
+          step={3}
+          icon={<Footprints className="h-6 w-6" />}
+          image={shoes}
+          onPick={async (f) => setShoes(await fileToDataUrl(f))}
+          inputRef={shoesRef}
+          optional
         />
       </section>
 
       {/* Gender toggle */}
       <div className="mt-7">
+        <div className="mb-2 text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+          Wearer
+        </div>
         <div className="relative grid grid-cols-2 rounded-full nm-inset-sm p-1.5">
           <span
             className="absolute inset-y-1.5 left-1.5 w-[calc(50%-0.375rem)] rounded-full bg-copper shadow-copper transition-transform duration-300"
@@ -257,10 +238,7 @@ function Home() {
           {(["women", "men"] as Gender[]).map((g) => (
             <button
               key={g}
-              onClick={() => {
-                setGender(g);
-                setSelectedStyle(null);
-              }}
+              onClick={() => setGender(g)}
               className={`relative z-10 py-2.5 text-sm font-bold capitalize tracking-wide transition-colors ${
                 gender === g ? "text-primary-foreground" : "text-muted-foreground"
               }`}
@@ -271,89 +249,11 @@ function Home() {
         </div>
       </div>
 
-      {/* Style picker — grouped by category */}
-      <section className="mt-6">
-        <div className="mb-4 flex items-baseline justify-between">
-          <h2 className="text-xl font-bold">
-            Choose <span className="text-gradient-copper">style</span>
-          </h2>
-          <span className="text-[11px] uppercase tracking-wider text-muted-foreground">
-            {styles.length} options
-          </span>
-        </div>
-
-        {Array.from(new Set(styles.map((s) => s.tag))).map((tag) => {
-          const group = styles.filter((s) => s.tag === tag);
-          return (
-            <div key={tag} className="mb-5 last:mb-0">
-              <div className="mb-2.5 flex items-center gap-2">
-                <span className="h-px flex-1 bg-border/60" />
-                <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
-                  {tag}
-                </span>
-                <span className="h-px flex-1 bg-border/60" />
-              </div>
-              <div className="grid grid-cols-3 gap-3">
-                {group.map((s) => {
-                  const active = selectedStyle === s.name;
-                  const Icon = s.icon;
-                  return (
-                    <button
-                      key={s.name}
-                      onClick={() => setSelectedStyle(s.name)}
-                      className={`relative flex aspect-square flex-col items-center justify-center gap-2 rounded-2xl p-2 text-center transition-all duration-200 ${
-                        active ? "nm-inset" : "nm-pressable"
-                      }`}
-                    >
-                      <div
-                        className={`flex h-10 w-10 items-center justify-center rounded-xl ${
-                          active
-                            ? "bg-copper text-primary-foreground shadow-copper"
-                            : "nm-inset-sm text-primary"
-                        }`}
-                      >
-                        <Icon className="h-5 w-5" strokeWidth={2} />
-                      </div>
-                      <div className="text-[11px] font-bold leading-tight text-foreground">
-                        {s.name}
-                      </div>
-                      {active && (
-                        <span className="absolute right-1.5 top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-copper text-primary-foreground shadow-copper">
-                          <Check className="h-2.5 w-2.5" strokeWidth={3.5} />
-                        </span>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          );
-        })}
-      </section>
-
-      {/* Loading overlay */}
-      {loading && (
-        <div className="fixed inset-0 z-30 flex flex-col items-center justify-center gap-5 bg-background/85 backdrop-blur-md">
-          <div className="relative flex h-24 w-24 items-center justify-center rounded-full nm-inset animate-nm-pulse">
-            <Loader2 className="h-9 w-9 animate-spin text-primary" />
-          </div>
-          <div className="text-center">
-            <div className="text-base font-bold text-foreground">Tailoring your look…</div>
-            <div className="mt-1 text-xs text-muted-foreground">
-              Stitching {selectedStyle} from your fabric
-            </div>
-          </div>
-          <div className="h-1.5 w-48 overflow-hidden rounded-full nm-inset-sm">
-            <div className="shimmer h-full w-full" />
-          </div>
-        </div>
-      )}
-
       {/* Sticky CTA */}
       <div className="fixed inset-x-0 bottom-0 z-20 mx-auto w-full max-w-[460px] px-5 pb-6 pt-8">
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background via-background/85 to-transparent" />
         <button
-          onClick={generate}
+          onClick={next}
           disabled={!ready}
           className={`relative flex h-16 w-full items-center justify-center gap-2.5 rounded-full text-base font-bold tracking-wide transition-all active:scale-[0.985] ${
             ready
@@ -361,21 +261,13 @@ function Home() {
               : "nm-raised text-muted-foreground"
           }`}
         >
-          {loading ? (
+          {!fabric || !person ? (
             <>
-              <Loader2 className="h-5 w-5 animate-spin" /> Generating…
-            </>
-          ) : !fabric || !person ? (
-            <>
-              <Camera className="h-5 w-5" /> Upload both photos
-            </>
-          ) : !selectedStyle ? (
-            <>
-              <Shirt className="h-5 w-5" /> Pick a style
+              <Camera className="h-5 w-5" /> Upload fabric & photo
             </>
           ) : (
             <>
-              <Sparkles className="h-5 w-5" /> Try on {selectedStyle}
+              Choose your style <ArrowRight className="h-5 w-5" />
             </>
           )}
         </button>
