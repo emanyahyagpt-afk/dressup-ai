@@ -10,12 +10,18 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as StylesRouteImport } from './routes/styles'
+import { Route as ShoesRouteImport } from './routes/shoes'
 import { Route as ResultRouteImport } from './routes/result'
 import { Route as IndexRouteImport } from './routes/index'
 
 const StylesRoute = StylesRouteImport.update({
   id: '/styles',
   path: '/styles',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ShoesRoute = ShoesRouteImport.update({
+  id: '/shoes',
+  path: '/shoes',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ResultRoute = ResultRouteImport.update({
@@ -32,30 +38,34 @@ const IndexRoute = IndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/result': typeof ResultRoute
+  '/shoes': typeof ShoesRoute
   '/styles': typeof StylesRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/result': typeof ResultRoute
+  '/shoes': typeof ShoesRoute
   '/styles': typeof StylesRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/result': typeof ResultRoute
+  '/shoes': typeof ShoesRoute
   '/styles': typeof StylesRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/result' | '/styles'
+  fullPaths: '/' | '/result' | '/shoes' | '/styles'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/result' | '/styles'
-  id: '__root__' | '/' | '/result' | '/styles'
+  to: '/' | '/result' | '/shoes' | '/styles'
+  id: '__root__' | '/' | '/result' | '/shoes' | '/styles'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ResultRoute: typeof ResultRoute
+  ShoesRoute: typeof ShoesRoute
   StylesRoute: typeof StylesRoute
 }
 
@@ -66,6 +76,13 @@ declare module '@tanstack/react-router' {
       path: '/styles'
       fullPath: '/styles'
       preLoaderRoute: typeof StylesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/shoes': {
+      id: '/shoes'
+      path: '/shoes'
+      fullPath: '/shoes'
+      preLoaderRoute: typeof ShoesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/result': {
@@ -88,8 +105,19 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ResultRoute: ResultRoute,
+  ShoesRoute: ShoesRoute,
   StylesRoute: StylesRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
