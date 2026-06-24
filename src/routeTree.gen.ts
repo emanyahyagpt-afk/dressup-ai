@@ -9,9 +9,15 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as StylesRouteImport } from './routes/styles'
 import { Route as ResultRouteImport } from './routes/result'
 import { Route as IndexRouteImport } from './routes/index'
 
+const StylesRoute = StylesRouteImport.update({
+  id: '/styles',
+  path: '/styles',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ResultRoute = ResultRouteImport.update({
   id: '/result',
   path: '/result',
@@ -26,31 +32,42 @@ const IndexRoute = IndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/result': typeof ResultRoute
+  '/styles': typeof StylesRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/result': typeof ResultRoute
+  '/styles': typeof StylesRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/result': typeof ResultRoute
+  '/styles': typeof StylesRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/result'
+  fullPaths: '/' | '/result' | '/styles'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/result'
-  id: '__root__' | '/' | '/result'
+  to: '/' | '/result' | '/styles'
+  id: '__root__' | '/' | '/result' | '/styles'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ResultRoute: typeof ResultRoute
+  StylesRoute: typeof StylesRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/styles': {
+      id: '/styles'
+      path: '/styles'
+      fullPath: '/styles'
+      preLoaderRoute: typeof StylesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/result': {
       id: '/result'
       path: '/result'
@@ -71,6 +88,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ResultRoute: ResultRoute,
+  StylesRoute: StylesRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
