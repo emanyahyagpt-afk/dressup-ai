@@ -191,33 +191,30 @@ function Home() {
       </div>
 
       {/* Uploads */}
-      <section className="grid grid-cols-2 gap-4">
+      <section className="grid grid-cols-3 gap-3">
         <UploadTile
           label="Fabric"
-          hint="Unstitched cloth"
+          hint="Unstitched"
           step={1}
-          icon={<Shirt className="h-6 w-6" />}
+          icon={<Shirt className="h-5 w-5" />}
           image={fabric}
           onPick={async (f) => setFabric(await fileToDataUrl(f))}
           inputRef={fabricRef}
         />
         <UploadTile
           label="Your Photo"
-          hint="Full body works best"
+          hint="Full body"
           step={2}
-          icon={<User className="h-6 w-6" />}
+          icon={<User className="h-5 w-5" />}
           image={person}
           onPick={async (f) => setPerson(await fileToDataUrl(f))}
           inputRef={personRef}
         />
-      </section>
-
-      <section className="mt-4">
         <UploadTile
-          label="Shoes (optional)"
-          hint="Upload to match"
+          label="Shoes"
+          hint="Optional"
           step={3}
-          icon={<Footprints className="h-6 w-6" />}
+          icon={<Footprints className="h-5 w-5" />}
           image={shoes}
           onPick={async (f) => setShoes(await fileToDataUrl(f))}
           inputRef={shoesRef}
