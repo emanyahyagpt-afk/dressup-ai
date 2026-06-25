@@ -18,36 +18,39 @@ Deno.serve(async (req) => {
       });
     }
 
-    const imageLabels: string[] = ["IMAGE 1 = UNSTITCHED FABRIC", "IMAGE 2 = THE PERSON"];
+    const imageLabels: string[] = ["IMAGE 1 = THE PERSON / BASE PHOTO", "IMAGE 2 = UNSTITCHED FABRIC"];
     if (shoesImage) imageLabels.push("IMAGE 3 = SHOES REFERENCE");
 
     const shoesBlock = shoesImage
-      ? `\n\nIMAGE 3 — SHOES REFERENCE.\nReplicate these shoes EXACTLY on the person's feet — same colour, material, shape, straps, sole and style. Treat IMAGE 3 as ground truth for footwear. Do not change the person's legs, feet size, stance, body height or body shape while adding the shoes.`
-      : `\n\nFOOTWEAR: Render a pair of "${shoeStyle}" shoes on the person's feet that pair tastefully with the outfit. Realistic material, correct shape, correctly worn. Do not change the person's legs, feet size, stance, body height or body shape while adding the shoes.`;
+      ? `\n\nIMAGE 3 — SHOES REFERENCE.\nIf the original person photo shows the feet, replace only the footwear with these shoes exactly — same colour, material, shape, straps, sole and style. Treat IMAGE 3 as ground truth for footwear. If the feet are cropped out or hidden, do NOT extend the body, change the pose, invent legs, or reframe the image just to show shoes.`
+      : `\n\nFOOTWEAR: If the original person photo shows the feet, render a pair of "${shoeStyle}" shoes naturally on the same feet. If the feet are cropped out or hidden, do NOT extend the body, change the pose, invent legs, or reframe the image just to show shoes.`;
 
-    const prompt = `Photorealistic virtual try-on. You are given ${imageLabels.length} reference images: ${imageLabels.join(", ")}.
+    const prompt = `Photorealistic identity-preserving virtual try-on. You are given ${imageLabels.length} reference images: ${imageLabels.join(", ")}.
 
-IMAGE 1 — UNSTITCHED FABRIC (raw cloth swatch).
-You MUST replicate this fabric with 100% fidelity on the final garment:
+IMAGE 1 — THE PERSON / BASE PHOTO / IDENTITY AND POSE LOCK.
+Use IMAGE 1 as the actual base canvas for the final result. This is an image-editing task, not a new person generation task.
+Preserve the uploaded person exactly:
+- Keep the exact same face identity, facial structure, eyes, nose, lips, jawline, ears, eyebrows, expression and skin tone.
+- Keep the exact same hair: hairstyle, hairline, length, volume, colour, parting, flyaways and coverage around the face.
+- Keep the exact same body physique, body proportions, shoulder width, waist, arms, legs, posture, stance, height and camera angle.
+- Keep the exact same pose, head angle, hand placement, limb placement, crop, framing, background perspective, lighting direction and shadows.
+- Keep the same age, gender presentation, ethnicity and natural imperfections. Do not beautify, slim, reshape, age, de-age, add makeup, smooth skin, change facial symmetry or create a new model.
+- The face, hair, head shape, visible skin, hands, arms, legs, body silhouette and pose are locked regions from IMAGE 1 and must remain recognizable as the same real individual.
+- If any instruction conflicts with identity, hair, body, pose, framing or crop preservation, preservation wins. Only edit clothing and visible footwear.
+
+IMAGE 2 — UNSTITCHED FABRIC (raw cloth swatch).
+You MUST replicate this fabric with 100% fidelity on the visible final garment:
 - exact same colour and colour temperature (do not shift hue, saturation or brightness)
 - exact same print/pattern, motifs, embroidery, prints, borders and their scale
 - exact same weave, sheen and texture (silk, cotton, chiffon, lawn, velvet, etc.)
 - preserve any border / pallu / panel layout naturally on the stitched garment
-Treat IMAGE 1 as the ground truth for the fabric. Do NOT invent a new pattern or change colours.
+Treat IMAGE 2 as the ground truth for the fabric. Do NOT invent a new pattern or change colours.${shoesBlock}
 
-IMAGE 2 — THE PERSON / IDENTITY LOCK.
-This is a clothing-and-footwear replacement task, NOT a person replacement task. Preserve the uploaded person exactly:
-- Keep the exact same face identity, facial structure, eyes, nose, lips, jawline, ears, eyebrows, expression and skin tone.
-- Keep the exact same hair: hairstyle, hairline, length, volume, colour, parting, flyaways and coverage around the face.
-- Keep the exact same body physique, body proportions, shoulder width, waist, arms, legs, posture, stance, height and camera angle.
-- Keep the same age, gender presentation, ethnicity and natural imperfections. Do not beautify, slim, reshape, age, de-age, add makeup, smooth skin, change facial symmetry or create a new model.
-- The face, hair, head shape and visible skin are ground truth from IMAGE 2 and must remain recognizable as the same real individual.
-- If any instruction conflicts with identity preservation, identity preservation wins. Only change the clothing fabric/style and shoes.${shoesBlock}
-
-TASK: Tailor the fabric from IMAGE 1 into a well-stitched "${style}" garment for a ${gender}, and dress the exact same person from IMAGE 2 in it, wearing ${shoeStyle ?? "appropriate"} shoes. Keep the original face, hair, body shape, height, pose and proportions unchanged. Show a single FULL-BODY, head-to-toe, sharp, photorealistic image with the person still recognizable as the same individual. Feet and shoes MUST be visible in frame. Studio-quality lighting, neutral clean background, natural fabric drape and realistic stitching.
+TASK: Edit IMAGE 1 directly by replacing only the person's current visible clothing with a well-stitched "${style}" garment for a ${gender}, tailored from the fabric in IMAGE 2. Preserve the exact original face, hair, body shape, height, pose, proportions, camera angle, crop and background. Add footwear only where the original feet are already visible. Do not create a different pose, full-body version, studio model, new background, new face, new hair, or altered body. Natural fabric drape and realistic stitching should follow the original body's locked shape and pose.
 
 STRICT OUTPUT RULES:
-- Identity fidelity is mandatory: do not replace, redraw or reinterpret the face, hair, body physique, pose or height.
+- Identity fidelity is mandatory: do not replace, redraw or reinterpret the face, hair, body physique, pose, height, stance, crop or camera angle.
+- Do not force a full-body output if the uploaded photo is not full-body; never invent missing legs/feet or alter the person's pose to show shoes.
 - High resolution, sharp, no pixelation, no blur, no compression artefacts, no upscaling smear.
 - NO watermark, NO logo, NO signature, NO "Dreamslight", NO "Gemini", NO text, NO captions, NO borders, NO frame.
 - Do not add any brand mark or sample/preview overlay anywhere in the image.
@@ -55,8 +58,8 @@ STRICT OUTPUT RULES:
 
     const content: Array<Record<string, unknown>> = [
       { type: "text", text: prompt },
-      { type: "image_url", image_url: { url: fabricImage } },
       { type: "image_url", image_url: { url: personImage } },
+      { type: "image_url", image_url: { url: fabricImage } },
     ];
     if (shoesImage) content.push({ type: "image_url", image_url: { url: shoesImage } });
 
@@ -67,7 +70,7 @@ STRICT OUTPUT RULES:
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3-pro-image-preview",
+        model: "google/gemini-3-pro-image",
         messages: [{ role: "user", content }],
         modalities: ["image", "text"],
       }),
