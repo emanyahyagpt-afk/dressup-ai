@@ -14,11 +14,15 @@ Deno.serve(async (req) => {
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY missing");
     if (!fabricImage || !personImage || !style) {
       return new Response(JSON.stringify({ error: "Missing inputs" }), {
-        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const imageLabels: string[] = ["IMAGE 1 = THE PERSON / BASE PHOTO", "IMAGE 2 = UNSTITCHED FABRIC"];
+    const imageLabels: string[] = [
+      "IMAGE 1 = THE PERSON / BASE PHOTO",
+      "IMAGE 2 = UNSTITCHED FABRIC",
+    ];
     if (shoesImage) imageLabels.push("IMAGE 3 = SHOES REFERENCE");
 
     const shoesBlock = shoesImage
@@ -80,21 +84,29 @@ STRICT OUTPUT RULES:
       const t = await resp.text();
       console.error("AI gateway error", resp.status, t);
       if (resp.status === 429)
-        return new Response(JSON.stringify({ error: "Rate limit reached. Please try again in a moment." }),
-          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+        return new Response(
+          JSON.stringify({ error: "Rate limit reached. Please try again in a moment." }),
+          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
       if (resp.status === 402)
-        return new Response(JSON.stringify({ error: "AI credits exhausted. Add credits in workspace settings." }),
-          { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-      return new Response(JSON.stringify({ error: "Try-on failed" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+        return new Response(
+          JSON.stringify({ error: "AI credits exhausted. Add credits in workspace settings." }),
+          { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      return new Response(JSON.stringify({ error: "Try-on failed" }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     const data = await resp.json();
     const imageUrl = data?.choices?.[0]?.message?.images?.[0]?.image_url?.url;
     if (!imageUrl) {
       console.error("No image in response", JSON.stringify(data).slice(0, 500));
-      return new Response(JSON.stringify({ error: "No image returned" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      return new Response(JSON.stringify({ error: "No image returned" }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     return new Response(JSON.stringify({ image: imageUrl }), {
@@ -102,7 +114,9 @@ STRICT OUTPUT RULES:
     });
   } catch (e) {
     console.error("tryon error", e);
-    return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Unknown" }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Unknown" }), {
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   }
 });

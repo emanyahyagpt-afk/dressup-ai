@@ -54,9 +54,13 @@ function UploadTile({
     >
       {image ? (
         <>
-          <img src={image} alt={label} className="absolute inset-0 h-full w-full object-cover" />
+          <img
+            src={image}
+            alt={label}
+            className="animate-pop-in absolute inset-0 h-full w-full object-cover"
+          />
           <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-black/10" />
-          <div className="absolute right-3 top-3 flex h-7 w-7 items-center justify-center rounded-full bg-copper text-primary-foreground shadow-copper">
+          <div className="shadow-glow absolute right-3 top-3 flex h-7 w-7 items-center justify-center rounded-full bg-copper text-primary-foreground">
             <Check className="h-4 w-4" strokeWidth={3} />
           </div>
           <div className="absolute inset-x-0 bottom-0 flex items-center justify-between p-3 text-xs text-white">
@@ -71,7 +75,7 @@ function UploadTile({
           <div className="flex h-6 w-6 items-center justify-center rounded-full nm-inset-sm text-[10px] font-bold text-muted-foreground">
             {step}
           </div>
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl nm-inset text-primary">
+          <div className="animate-tile-breathe nm-inset flex h-14 w-14 items-center justify-center rounded-2xl text-primary">
             {icon}
           </div>
           <div className="text-[13px] font-semibold text-foreground leading-tight">{label}</div>
@@ -137,7 +141,17 @@ function Home() {
   };
 
   return (
-    <main className="mx-auto min-h-svh w-full max-w-[460px] px-5 pb-36 pt-7">
+    <main className="relative mx-auto min-h-svh w-full max-w-[460px] px-5 pb-36 pt-7">
+      {/* Aurora backdrop */}
+      <div className="bg-aurora pointer-events-none absolute inset-0 -z-10" />
+      <div
+        className="animate-shape-spin pointer-events-none absolute -top-16 left-1/2 -z-10 h-64 w-64 -translate-x-1/2 rounded-full blur-3xl"
+        style={{
+          background:
+            "conic-gradient(from 0deg, oklch(0.72 0.16 45 / 0.12), transparent 35%, oklch(0.85 0.07 65 / 0.14) 60%, transparent 80%)",
+        }}
+      />
+
       <Toaster
         position="top-center"
         toastOptions={{
@@ -152,9 +166,9 @@ function Home() {
       />
 
       {/* Header */}
-      <header className="mb-7 flex items-center justify-between">
+      <header className="animate-fade-up mb-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl nm-raised-sm">
+          <div className="shadow-glow flex h-12 w-12 items-center justify-center rounded-2xl nm-raised-sm">
             <span className="text-xl font-bold text-gradient-copper">U</span>
           </div>
           <div>
@@ -171,15 +185,29 @@ function Home() {
         </div>
       </header>
 
+      {/* Hero statement */}
+      <div className="animate-fade-up mb-6 text-center" style={{ animationDelay: "90ms" }}>
+        <h2 className="text-[15px] font-bold leading-snug tracking-tight text-foreground">
+          See your unstitched fabric
+          <span className="text-gradient-copper"> tailored on you</span>
+        </h2>
+        <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
+          AI-stitched previews in your chosen style — face, pose and fit preserved.
+        </p>
+      </div>
+
       {/* Step indicator */}
-      <div className="mb-6 rounded-3xl nm-raised p-4">
+      <div
+        className="animate-fade-up mb-6 rounded-3xl nm-raised p-4"
+        style={{ animationDelay: "180ms" }}
+      >
         <div className="flex items-center justify-between text-xs">
           <span className="font-semibold text-foreground">Step 1 of 3 · Uploads</span>
           <span className="font-bold text-primary">{progress}%</span>
         </div>
         <div className="mt-3 h-2.5 rounded-full nm-inset-sm overflow-hidden">
           <div
-            className="h-full bg-copper rounded-full transition-all duration-500 ease-out"
+            className="bg-copper animate-progress-glow h-full rounded-full transition-all duration-500 ease-out"
             style={{ width: `${progress}%` }}
           />
         </div>
@@ -192,44 +220,67 @@ function Home() {
 
       {/* Uploads */}
       <section className="grid grid-cols-3 gap-3">
-        <UploadTile
-          label="Fabric"
-          hint="Unstitched"
-          step={1}
-          icon={<Shirt className="h-5 w-5" />}
-          image={fabric}
-          onPick={async (f) => setFabric(await fileToDataUrl(f))}
-          inputRef={fabricRef}
-        />
-        <UploadTile
-          label="Your Photo"
-          hint="Full body"
-          step={2}
-          icon={<User className="h-5 w-5" />}
-          image={person}
-          onPick={async (f) => setPerson(await fileToDataUrl(f))}
-          inputRef={personRef}
-        />
-        <UploadTile
-          label="Shoes"
-          hint="Optional"
-          step={3}
-          icon={<Footprints className="h-5 w-5" />}
-          image={shoes}
-          onPick={async (f) => setShoes(await fileToDataUrl(f))}
-          inputRef={shoesRef}
-          optional
-        />
+        {[
+          {
+            key: "fabric",
+            label: "Fabric",
+            hint: "Unstitched",
+            step: 1,
+            icon: <Shirt className="h-5 w-5" />,
+            image: fabric,
+          },
+          {
+            key: "person",
+            label: "Your Photo",
+            hint: "Full body",
+            step: 2,
+            icon: <User className="h-5 w-5" />,
+            image: person,
+          },
+          {
+            key: "shoes",
+            label: "Shoes",
+            hint: "Optional",
+            step: 3,
+            icon: <Footprints className="h-5 w-5" />,
+            image: shoes,
+            optional: true,
+          },
+        ].map((tile, i) => (
+          <div
+            key={tile.key}
+            className="animate-fade-up"
+            style={{ animationDelay: `${240 + i * 90}ms` }}
+          >
+            <UploadTile
+              label={tile.label}
+              hint={tile.hint}
+              step={tile.step}
+              icon={tile.icon}
+              image={tile.image}
+              onPick={async (f) => {
+                const url = await fileToDataUrl(f);
+                if (tile.key === "fabric") setFabric(url);
+                else if (tile.key === "person") setPerson(url);
+                else setShoes(url);
+              }}
+              inputRef={
+                tile.key === "fabric" ? fabricRef : tile.key === "person" ? personRef : shoesRef
+              }
+              optional={tile.optional}
+            />
+          </div>
+        ))}
       </section>
 
       {/* Gender toggle */}
-      <div className="mt-7">
+      <div className="animate-fade-up mt-7" style={{ animationDelay: "520ms" }}>
         <div className="mb-2 text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
           Wearer
         </div>
         <div className="relative grid grid-cols-2 rounded-full nm-inset-sm p-1.5">
           <span
-            className="absolute inset-y-1.5 left-1.5 w-[calc(50%-0.375rem)] rounded-full bg-copper shadow-copper transition-transform duration-300"
+            className="bg-copper shadow-glow absolute inset-y-1.5 left-1.5 w-[calc(50%-0.375rem)] rounded-full transition-transform duration-300"
             style={{ transform: gender === "women" ? "translateX(0)" : "translateX(100%)" }}
           />
           {(["women", "men"] as Gender[]).map((g) => (
@@ -249,25 +300,22 @@ function Home() {
       {/* Sticky CTA */}
       <div className="fixed inset-x-0 bottom-0 z-20 mx-auto w-full max-w-[460px] px-5 pb-6 pt-8">
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background via-background/85 to-transparent" />
-        <button
-          onClick={next}
-          disabled={!ready}
-          className={`relative flex h-16 w-full items-center justify-center gap-2.5 rounded-full text-base font-bold tracking-wide transition-all active:scale-[0.985] ${
-            ready
-              ? "bg-copper text-primary-foreground shadow-copper"
-              : "nm-raised text-muted-foreground"
-          }`}
-        >
-          {!fabric || !person ? (
-            <>
-              <Camera className="h-5 w-5" /> Upload fabric & photo
-            </>
-          ) : (
-            <>
-              Choose your style <ArrowRight className="h-5 w-5" />
-            </>
-          )}
-        </button>
+        {ready ? (
+          <button
+            onClick={next}
+            className="bg-copper text-primary-foreground shadow-glow-strong animate-cta-breathe relative flex h-16 w-full items-center justify-center gap-2.5 rounded-full text-base font-bold tracking-wide transition-all active:scale-[0.985]"
+          >
+            Choose your style <ArrowRight className="h-5 w-5" />
+          </button>
+        ) : (
+          <button
+            onClick={next}
+            disabled
+            className="nm-raised relative flex h-16 w-full items-center justify-center gap-2.5 rounded-full text-base font-bold tracking-wide text-muted-foreground"
+          >
+            <Camera className="h-5 w-5" /> Upload fabric & photo
+          </button>
+        )}
       </div>
     </main>
   );

@@ -1,8 +1,22 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, type ComponentType } from "react";
 import {
-  ArrowLeft, ArrowRight, Check, Sparkles, Shirt,
-  Crown, Gem, Flower2, Leaf, Wind, Moon, Award, Briefcase, Flame, Tag, User,
+  ArrowLeft,
+  ArrowRight,
+  Check,
+  Sparkles,
+  Shirt,
+  Crown,
+  Gem,
+  Flower2,
+  Leaf,
+  Wind,
+  Moon,
+  Award,
+  Briefcase,
+  Flame,
+  Tag,
+  User,
 } from "lucide-react";
 import { toast, Toaster } from "sonner";
 
@@ -72,13 +86,16 @@ function StylesPage() {
   };
 
   return (
-    <main className="mx-auto min-h-svh w-full max-w-[460px] px-5 pb-36 pt-7">
+    <main className="relative mx-auto min-h-svh w-full max-w-[460px] px-5 pb-36 pt-7">
+      {/* Aurora backdrop */}
+      <div className="bg-aurora pointer-events-none absolute inset-0 -z-10" />
+
       <Toaster position="top-center" />
 
-      <header className="mb-6 flex items-center justify-between">
+      <header className="animate-fade-up mb-6 flex items-center justify-between">
         <Link
           to="/"
-          className="flex h-11 w-11 items-center justify-center rounded-2xl nm-raised-sm text-foreground"
+          className="nm-raised-sm flex h-11 w-11 items-center justify-center rounded-2xl text-foreground"
           aria-label="Back"
         >
           <ArrowLeft className="h-5 w-5" />
@@ -95,10 +112,10 @@ function StylesPage() {
       </header>
 
       {/* Gender toggle */}
-      <div className="mb-6">
+      <div className="animate-fade-up mb-6" style={{ animationDelay: "120ms" }}>
         <div className="relative grid grid-cols-2 rounded-full nm-inset-sm p-1.5">
           <span
-            className="absolute inset-y-1.5 left-1.5 w-[calc(50%-0.375rem)] rounded-full bg-copper shadow-copper transition-transform duration-300"
+            className="bg-copper shadow-glow absolute inset-y-1.5 left-1.5 w-[calc(50%-0.375rem)] rounded-full transition-transform duration-300"
             style={{ transform: gender === "women" ? "translateX(0)" : "translateX(100%)" }}
           />
           {(["women", "men"] as Gender[]).map((g) => (
@@ -118,7 +135,10 @@ function StylesPage() {
         </div>
       </div>
 
-      <div className="mb-4 flex items-baseline justify-between">
+      <div
+        className="animate-fade-up mb-4 flex items-baseline justify-between"
+        style={{ animationDelay: "160ms" }}
+      >
         <h2 className="text-xl font-bold">
           Choose <span className="text-gradient-copper">style</span>
         </h2>
@@ -127,43 +147,52 @@ function StylesPage() {
         </span>
       </div>
 
-      {Array.from(new Set(styles.map((s) => s.tag))).map((tag) => {
+      {Array.from(new Set(styles.map((s) => s.tag))).map((tag, tagIndex) => {
         const group = styles.filter((s) => s.tag === tag);
         return (
-          <div key={tag} className="mb-5 last:mb-0">
+          <div
+            key={tag}
+            className="animate-fade-up mb-5 last:mb-0"
+            style={{ animationDelay: `${200 + tagIndex * 120}ms` }}
+          >
             <div className="mb-2.5 flex items-center gap-2">
-              <span className="h-px flex-1 bg-border/60" />
+              <span className="bg-copper-line h-px flex-1" />
               <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
                 {tag}
               </span>
-              <span className="h-px flex-1 bg-border/60" />
+              <span className="bg-copper-line h-px flex-1" />
             </div>
             <div className="grid grid-cols-3 gap-3">
-              {group.map((s) => {
+              {group.map((s, i) => {
                 const active = selectedStyle === s.name;
                 const Icon = s.icon;
                 return (
                   <button
                     key={s.name}
                     onClick={() => setSelectedStyle(s.name)}
-                    className={`relative flex aspect-square flex-col items-center justify-center gap-2 rounded-2xl p-2 text-center transition-all duration-200 ${
+                    style={{ animationDelay: `${260 + tagIndex * 120 + i * 45}ms` }}
+                    className={`animate-fade-up relative flex aspect-square flex-col items-center justify-center gap-2 rounded-2xl p-2 text-center transition-all duration-200 ${
                       active ? "nm-inset" : "nm-pressable"
                     }`}
                   >
                     <div
-                      className={`flex h-10 w-10 items-center justify-center rounded-xl ${
+                      className={`flex h-10 w-10 items-center justify-center rounded-xl transition-all duration-200 ${
                         active
-                          ? "bg-copper text-primary-foreground shadow-copper"
+                          ? "bg-copper text-primary-foreground shadow-glow"
                           : "nm-inset-sm text-primary"
                       }`}
                     >
                       <Icon className="h-5 w-5" strokeWidth={2} />
                     </div>
-                    <div className="text-[11px] font-bold leading-tight text-foreground">
+                    <div
+                      className={`text-[11px] font-bold leading-tight transition-colors ${
+                        active ? "text-primary" : "text-foreground"
+                      }`}
+                    >
                       {s.name}
                     </div>
                     {active && (
-                      <span className="absolute right-1.5 top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-copper text-primary-foreground shadow-copper">
+                      <span className="shadow-glow animate-pop-in absolute right-1.5 top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-copper text-primary-foreground">
                         <Check className="h-2.5 w-2.5" strokeWidth={3.5} />
                       </span>
                     )}
@@ -182,7 +211,7 @@ function StylesPage() {
           disabled={!selectedStyle}
           className={`relative flex h-16 w-full items-center justify-center gap-2.5 rounded-full text-base font-bold tracking-wide transition-all active:scale-[0.985] ${
             selectedStyle
-              ? "bg-copper text-primary-foreground shadow-copper"
+              ? "bg-copper text-primary-foreground shadow-glow-strong animate-cta-breathe"
               : "nm-raised text-muted-foreground"
           }`}
         >

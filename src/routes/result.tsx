@@ -54,7 +54,10 @@ function ResultPage() {
   if (!image) return null;
 
   return (
-    <main className="mx-auto min-h-svh w-full max-w-[460px] px-5 pb-32 pt-7">
+    <main className="relative mx-auto min-h-svh w-full max-w-[460px] px-5 pb-32 pt-7">
+      {/* Aurora backdrop */}
+      <div className="bg-aurora pointer-events-none absolute inset-0 -z-10" />
+
       <Toaster
         position="top-center"
         toastOptions={{
@@ -68,10 +71,10 @@ function ResultPage() {
         }}
       />
 
-      <header className="mb-6 flex items-center justify-between">
+      <header className="animate-fade-up mb-6 flex items-center justify-between">
         <Link
           to="/"
-          className="flex h-11 w-11 items-center justify-center rounded-2xl nm-raised-sm text-foreground"
+          className="nm-raised-sm flex h-11 w-11 items-center justify-center rounded-2xl text-foreground"
           aria-label="Back"
         >
           <ArrowLeft className="h-5 w-5" />
@@ -88,7 +91,10 @@ function ResultPage() {
       </header>
 
       {style && (
-        <div className="mb-5 flex items-center justify-center gap-2 rounded-full nm-inset-sm py-2.5">
+        <div
+          className="animate-fade-up mb-5 flex items-center justify-center gap-2 rounded-full nm-inset-sm py-2.5"
+          style={{ animationDelay: "100ms" }}
+        >
           <Wand2 className="h-3.5 w-3.5 text-primary" />
           <span className="text-xs font-bold uppercase tracking-[0.18em] text-foreground">
             {style}
@@ -96,27 +102,41 @@ function ResultPage() {
         </div>
       )}
 
-      <div className="relative aspect-[3/4] w-full overflow-hidden rounded-[2rem] nm-raised-lg">
+      <div
+        className="animate-reveal-in relative aspect-[3/4] w-full overflow-hidden rounded-[2rem] nm-raised-lg"
+        style={{ animationDelay: "200ms" }}
+      >
         <img src={image} alt={`Try-on ${style}`} className="h-full w-full object-cover" />
+        {/* Glow frame accents */}
+        <div className="pointer-events-none absolute inset-0 rounded-[2rem] ring-1 ring-inset ring-white/40" />
+        <Sparkles className="animate-sparkle absolute right-5 top-5 h-6 w-6 text-white drop-shadow-[0_2px_6px_rgba(0,0,0,0.35)]" />
+        <Sparkles
+          className="animate-sparkle absolute bottom-8 left-5 h-4 w-4 text-white/80 drop-shadow-[0_2px_6px_rgba(0,0,0,0.35)]"
+          style={{ animationDelay: "1.3s" }}
+          aria-hidden
+        />
       </div>
 
-      <div className="mt-6 grid grid-cols-3 gap-3">
+      <div
+        className="animate-fade-up mt-6 grid grid-cols-3 gap-3"
+        style={{ animationDelay: "380ms" }}
+      >
         <a
           href={image}
           download="unstitch-tryon.png"
-          className="flex flex-col items-center justify-center gap-1.5 rounded-2xl nm-pressable py-4 text-xs font-bold text-foreground"
+          className="nm-pressable flex flex-col items-center justify-center gap-1.5 rounded-2xl py-4 text-xs font-bold text-foreground"
         >
           <Download className="h-5 w-5 text-primary" /> Save
         </a>
         <button
           onClick={share}
-          className="flex flex-col items-center justify-center gap-1.5 rounded-2xl nm-pressable py-4 text-xs font-bold text-foreground"
+          className="nm-pressable flex flex-col items-center justify-center gap-1.5 rounded-2xl py-4 text-xs font-bold text-foreground"
         >
           <Share2 className="h-5 w-5 text-primary" /> Share
         </button>
         <button
           onClick={startOver}
-          className="flex flex-col items-center justify-center gap-1.5 rounded-2xl nm-pressable py-4 text-xs font-bold text-foreground"
+          className="nm-pressable flex flex-col items-center justify-center gap-1.5 rounded-2xl py-4 text-xs font-bold text-foreground"
         >
           <RotateCcw className="h-5 w-5 text-primary" /> New
         </button>
@@ -126,7 +146,7 @@ function ResultPage() {
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background via-background/85 to-transparent" />
         <Link
           to="/"
-          className="relative flex h-14 w-full items-center justify-center gap-2 rounded-full bg-copper text-base font-bold text-primary-foreground shadow-copper active:scale-[0.985]"
+          className="bg-copper text-primary-foreground shadow-glow-strong animate-cta-breathe relative flex h-14 w-full items-center justify-center gap-2 rounded-full text-base font-bold active:scale-[0.985]"
         >
           <Sparkles className="h-5 w-5" /> Try another style
         </Link>

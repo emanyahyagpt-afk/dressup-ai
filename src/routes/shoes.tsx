@@ -1,10 +1,28 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, type ComponentType } from "react";
 import {
-  ArrowLeft, Check, Sparkles, Footprints, Loader2,
-  Crown, Wind, Mountain, Snowflake, Flame, Activity, Anchor, Heart,
+  ArrowLeft,
+  Check,
+  Sparkles,
+  Footprints,
+  Loader2,
+  Crown,
+  Wind,
+  Mountain,
+  Snowflake,
+  Flame,
+  Activity,
+  Anchor,
+  Heart,
 } from "lucide-react";
 import { toast, Toaster } from "sonner";
+
+const LOADING_STAGES = [
+  "Reading your fabric…",
+  "Stitching the drape…",
+  "Matching your shoes…",
+  "Adding final touches…",
+];
 
 export const Route = createFileRoute("/shoes")({
   head: () => ({
@@ -51,6 +69,17 @@ function ShoesPage() {
   const [dressStyle, setDressStyle] = useState<string>("");
   const [selectedShoe, setSelectedShoe] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [stage, setStage] = useState(0);
+
+  // Cycle loading stages while generating
+  useEffect(() => {
+    if (!loading) return;
+    setStage(0);
+    const timer = setInterval(() => {
+      setStage((s) => (s + 1) % LOADING_STAGES.length);
+    }, 2600);
+    return () => clearInterval(timer);
+  }, [loading]);
 
   useEffect(() => {
     const fabric = sessionStorage.getItem("tryon:fabric");
@@ -111,13 +140,16 @@ function ShoesPage() {
   };
 
   return (
-    <main className="mx-auto min-h-svh w-full max-w-[460px] px-5 pb-36 pt-7">
+    <main className="relative mx-auto min-h-svh w-full max-w-[460px] px-5 pb-36 pt-7">
+      {/* Aurora backdrop */}
+      <div className="bg-aurora pointer-events-none absolute inset-0 -z-10" />
+
       <Toaster position="top-center" />
 
-      <header className="mb-6 flex items-center justify-between">
+      <header className="animate-fade-up mb-6 flex items-center justify-between">
         <Link
           to="/styles"
-          className="flex h-11 w-11 items-center justify-center rounded-2xl nm-raised-sm text-foreground"
+          className="nm-raised-sm flex h-11 w-11 items-center justify-center rounded-2xl text-foreground"
           aria-label="Back"
         >
           <ArrowLeft className="h-5 w-5" />
@@ -134,7 +166,10 @@ function ShoesPage() {
       </header>
 
       {dressStyle && (
-        <div className="mb-6 flex items-center justify-center gap-2 rounded-full nm-inset-sm py-2.5">
+        <div
+          className="animate-fade-up mb-6 flex items-center justify-center gap-2 rounded-full nm-inset-sm py-2.5"
+          style={{ animationDelay: "100ms" }}
+        >
           <Sparkles className="h-3.5 w-3.5 text-primary" />
           <span className="text-xs font-bold uppercase tracking-[0.18em] text-foreground">
             {dressStyle}
@@ -151,43 +186,52 @@ function ShoesPage() {
         </span>
       </div>
 
-      {Array.from(new Set(shoes.map((s) => s.tag))).map((tag) => {
+      {Array.from(new Set(shoes.map((s) => s.tag))).map((tag, tagIndex) => {
         const group = shoes.filter((s) => s.tag === tag);
         return (
-          <div key={tag} className="mb-5 last:mb-0">
+          <div
+            key={tag}
+            className="animate-fade-up mb-5 last:mb-0"
+            style={{ animationDelay: `${200 + tagIndex * 120}ms` }}
+          >
             <div className="mb-2.5 flex items-center gap-2">
-              <span className="h-px flex-1 bg-border/60" />
+              <span className="bg-copper-line h-px flex-1" />
               <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
                 {tag}
               </span>
-              <span className="h-px flex-1 bg-border/60" />
+              <span className="bg-copper-line h-px flex-1" />
             </div>
             <div className="grid grid-cols-3 gap-3">
-              {group.map((s) => {
+              {group.map((s, i) => {
                 const active = selectedShoe === s.name;
                 const Icon = s.icon;
                 return (
                   <button
                     key={s.name}
                     onClick={() => setSelectedShoe(s.name)}
-                    className={`relative flex aspect-square flex-col items-center justify-center gap-2 rounded-2xl p-2 text-center transition-all duration-200 ${
+                    style={{ animationDelay: `${260 + tagIndex * 120 + i * 45}ms` }}
+                    className={`animate-fade-up relative flex aspect-square flex-col items-center justify-center gap-2 rounded-2xl p-2 text-center transition-all duration-200 ${
                       active ? "nm-inset" : "nm-pressable"
                     }`}
                   >
                     <div
-                      className={`flex h-10 w-10 items-center justify-center rounded-xl ${
+                      className={`flex h-10 w-10 items-center justify-center rounded-xl transition-all duration-200 ${
                         active
-                          ? "bg-copper text-primary-foreground shadow-copper"
+                          ? "bg-copper text-primary-foreground shadow-glow"
                           : "nm-inset-sm text-primary"
                       }`}
                     >
                       <Icon className="h-5 w-5" strokeWidth={2} />
                     </div>
-                    <div className="text-[11px] font-bold leading-tight text-foreground">
+                    <div
+                      className={`text-[11px] font-bold leading-tight transition-colors ${
+                        active ? "text-primary" : "text-foreground"
+                      }`}
+                    >
                       {s.name}
                     </div>
                     {active && (
-                      <span className="absolute right-1.5 top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-copper text-primary-foreground shadow-copper">
+                      <span className="shadow-glow animate-pop-in absolute right-1.5 top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-copper text-primary-foreground">
                         <Check className="h-2.5 w-2.5" strokeWidth={3.5} />
                       </span>
                     )}
@@ -201,17 +245,25 @@ function ShoesPage() {
 
       {loading && (
         <div className="fixed inset-0 z-30 flex flex-col items-center justify-center gap-5 bg-background/85 backdrop-blur-md">
-          <div className="relative flex h-24 w-24 items-center justify-center rounded-full nm-inset animate-nm-pulse">
+          <div className="relative flex h-28 w-28 items-center justify-center">
+            {/* Pulsing rings */}
+            <span className="animate-nm-pulse absolute inset-0 rounded-full nm-inset" />
+            <span className="absolute inset-0 rounded-full border border-dashed border-primary/40 animate-shape-spin" />
             <Loader2 className="h-9 w-9 animate-spin text-primary" />
           </div>
           <div className="text-center">
             <div className="text-base font-bold text-foreground">Tailoring your look…</div>
-            <div className="mt-1 text-xs text-muted-foreground">
-              {dressStyle} with {selectedShoe}
+            <div className="mt-1.5 h-4 text-xs text-muted-foreground" aria-live="polite">
+              <span key={stage} className="animate-fade-up inline-block">
+                {LOADING_STAGES[stage]}
+              </span>
+            </div>
+            <div className="mt-1 text-[10px] font-bold uppercase tracking-[0.22em] text-primary/70">
+              {dressStyle} · {selectedShoe}
             </div>
           </div>
           <div className="h-1.5 w-48 overflow-hidden rounded-full nm-inset-sm">
-            <div className="shimmer h-full w-full" />
+            <div className="shimmer bg-copper h-full w-full rounded-full" />
           </div>
         </div>
       )}
@@ -223,7 +275,7 @@ function ShoesPage() {
           disabled={!selectedShoe || loading}
           className={`relative flex h-16 w-full items-center justify-center gap-2.5 rounded-full text-base font-bold tracking-wide transition-all active:scale-[0.985] ${
             selectedShoe && !loading
-              ? "bg-copper text-primary-foreground shadow-copper"
+              ? "bg-copper text-primary-foreground shadow-glow-strong animate-cta-breathe"
               : "nm-raised text-muted-foreground"
           }`}
         >
